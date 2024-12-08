@@ -59,6 +59,15 @@ class TextAnalyzer:
         }
 
 class SpacingChecker:
+    def __init__(self):
+        # 띄어쓰기 규칙을 외부 파일에서 읽어오도록 개선 (rules.txt 파일 필요)
+        with open('rules.txt', 'r', encoding='utf-8') as f:
+            self.spacing_rules = {}
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    pattern, replacement = line.strip().split(',')
+                    self.spacing_rules[pattern] = replacement
+
     def check(self, text):
         suggestions = []
         offset = 0  # 띄어쓰기 교정으로 인한 텍스트 길이 변화를 반영하기 위한 변수
@@ -95,48 +104,7 @@ def main():
         analyzer = TextAnalyzer(text)
         checker = SpacingChecker()
 
-        # 기본 통계
-        col1, col2, col3, col4 = st.columns(4)
-
-        total_chars, chars_no_spaces = analyzer.get_char_count()
-        korean_words, english_words = analyzer.get_word_count()
-
-        with col1:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown("### 전체 글자 수")
-            st.markdown(f'<p class="stat-value">{total_chars:,}자</p>', unsafe_allow_html=True)
-            st.markdown(f'(공백 제외: {chars_no_spaces:,}자)')
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        with col2:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown("### 단어 수")
-            st.markdown(f'<p class="stat-value">{korean_words + english_words:,}개</p>', unsafe_allow_html=True)
-            st.markdown(f'(한글: {korean_words:,}, 영어: {english_words:,})')
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        with col3:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown("### 줄 수")
-            st.markdown(f'<p class="stat-value">{len(text.split(chr(10))):,}줄</p>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        with col4:
-            st.markdown('<div class="result-card">', unsafe_allow_html=True)
-            st.markdown("### 문장 수")
-            st.markdown(f'<p class="stat-value">{len(analyzer.sentences):,}문장</p>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        # 문자 종류별 분석
-        st.markdown("### 📊 문자 종류별 분석")
-        char_types = analyzer.get_char_types()
-
-        fig = px.pie(
-            values=list(char_types.values()),
-            names=list(char_types.keys()),
-            title='문자 종류별 비율'
-        )
-        st.plotly_chart(fig)
+        # ... (기본 통계, 문자 종류별 분석) ...
 
         # 띄어쓰기 분석
         st.markdown("### 🔍 띄어쓰기 분석")
@@ -151,7 +119,7 @@ def main():
                             unsafe_allow_html=True)
 
             corrected_text = text
-            for suggestion in reversed(spacing_suggestions):
+            for suggestion in reversed(spacing_suggestions):  # reversed() 함수를 사용하여 뒤에서부터 교정
                 start, end = suggestion['start'], suggestion['end']
                 corrected_text = corrected_text[:start] + suggestion['corrected'] + corrected_text[end:]
 
@@ -161,19 +129,7 @@ def main():
         else:
             st.success("기본적인 띄어쓰기 검사에서 특이사항이 발견되지 않았습니다.")
 
-    # 블로그 링크 섹션
-    st.markdown('---')
-    st.markdown('''
-        ### 🔍 더 많은 정보가 필요하신가요?
-
-        텍스트 분석과 관련된 자세한 정보를 확인해보세요:
-
-        - ✍️ [한글 맞춤법 가이드](https://lzhakko.tistory.com/)
-        - 📚 [효과적인 글쓰기 팁](https://lzhakko.tistory.com/)
-        - 💡 [텍스트 분석 활용하기](https://lzhakko.tistory.com/)
-
-        더 많은 유용한 정보는 [개발하는 나무](https://lzhakko.tistory.com/)에서 확인하세요!
-        ''')
+    # ... (블로그 링크 섹션) ...
 
 if __name__ == '__main__':
     main()
