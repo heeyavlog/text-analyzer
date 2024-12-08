@@ -44,27 +44,36 @@ def count_words(text):
    english_words = len(re.findall(r'[a-zA-Z]+', text))
    return korean_words, english_words
 
-def count_lines(text):
-   """줄 수 세기"""
-   return len(text.split('\n'))
-
 def analyze_spacing(text):
-   """띄어쓰기 분석"""
-   # 기본적인 띄어쓰기 패턴 검사
-   common_patterns = {
-       r'[이]여서': '이어서',
-       r'것을': '걸',
-       r'수있': '수 있',
-       r'던것': '던 것',
-       r'같애': '같아',
-   }
-   
-   suggestions = []
-   for pattern, correction in common_patterns.items():
-       if re.search(pattern, text):
-           suggestions.append(f"'{pattern}' → '{correction}'")
-   
-   return suggestions
+    """띄어쓰기 분석 및 교정"""
+    original_text = text
+    suggestions = []
+    
+    # 자주 틀리는 패턴과 교정
+    patterns = {
+        r'([가-힣]+)때문에': r'\1 때문에',
+        r'([가-힣]+)같은': r'\1 같은',
+        r'수있': '수 있',
+        r'것을': '걸',
+        r'([가-힣]+)스러워': r'\1스러워'
+    }
+    
+    corrected_text = text
+    for pattern, correction in patterns.items():
+        if re.search(pattern, text):
+            # 틀린 부분 찾기
+            found = re.finditer(pattern, text)
+            for match in found:
+                wrong_text = match.group(0)
+                correct_text = re.sub(pattern, correction, wrong_text)
+                suggestions.append({
+                    'wrong': wrong_text,
+                    'correct': correct_text,
+                    'position': match.span()
+                })
+                corrected_text = corrected_text.replace(wrong_text, correct_text)
+    
+    return suggestions, corrected_text
 
 def main():
    st.title("📝 텍스트 분석기")
@@ -136,17 +145,19 @@ def main():
        )
        st.plotly_chart(fig)
        
-       # 띄어쓰기 분석
-       st.markdown("### 🔍 띄어쓰기 분석")
-       spacing_suggestions = analyze_spacing(text)
-       if spacing_suggestions:
-           st.markdown('<div class="result-card">', unsafe_allow_html=True)
-           st.markdown("#### 띄어쓰기 제안:")
-           for suggestion in spacing_suggestions:
-               st.markdown(f"- {suggestion}")
-           st.markdown('</div>', unsafe_allow_html=True)
-       else:
-           st.success("기본적인 띄어쓰기 검사에서 특이사항이 발견되지 않았습니다.")
+# 띄어쓰기 분석
+st.markdown("### 🔍 띄어쓰기 분석")
+suggestions, corrected_text = analyze_spacing(text)
+if suggestions:
+    st.markdown('<div class="result-card">', unsafe_allow_html=True)
+    st.markdown("#### 띄어쓰기 교정 제안:")
+    for suggestion in suggestions:
+        st.markdown(f"- '{suggestion['wrong']}' → '{suggestion['correct']}'")
+    
+    if st.button('교정된 텍스트 보기'):
+        st.text_area("교정된 텍스트:", corrected_text, height=200)
+else:
+    st.success("기본적인 띄어쓰기 검사에서 특이사항이 발견되지 않았습니다.")
        
        # 블로그 링크 섹션
        st.markdown('---')
