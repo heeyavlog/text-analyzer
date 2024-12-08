@@ -40,16 +40,25 @@ class TextAnalyzer:
         return re.split(r'[.!?]\s*', self.text)
 
     def get_char_count(self):
+        """
+        전체 글자 수와 공백 제외 글자 수를 반환합니다.
+        """
         total = len(self.text)
         no_spaces = len(self.text.replace(" ", ""))
         return total, no_spaces
 
     def get_word_count(self):
+        """
+        한글 단어 수와 영어 단어 수를 반환합니다.
+        """
         korean = len(re.findall(r'[가-힣]+', self.text))
         english = len(re.findall(r'[a-zA-Z]+', self.text))
         return korean, english
 
     def get_char_types(self):
+        """
+        각 문자 종류별 개수를 딕셔너리 형태로 반환합니다.
+        """
         return {
             '한글': len(re.findall(r'[가-힣]', self.text)),
             '영어': len(re.findall(r'[a-zA-Z]', self.text)),
@@ -60,8 +69,10 @@ class TextAnalyzer:
 
 class SpacingChecker:
     def __init__(self, rule_file='rules.txt'):
+        """
+        띄어쓰기 규칙을 담은 rules.txt 파일을 읽어옵니다. 파일이 없으면 에러 메시지를 출력합니다.
+        """
         try:
-            # 띄어쓰기 규칙을 외부 파일에서 읽어오도록 개선
             with open(rule_file, 'r', encoding='utf-8') as f:
                 self.spacing_rules = {}
                 for line in f:
@@ -73,8 +84,11 @@ class SpacingChecker:
             self.spacing_rules = {}
 
     def check(self, text):
+        """
+        텍스트에서 띄어쓰기 오류를 찾아 수정 제안을 리스트로 반환합니다.
+        """
         suggestions = []
-        offset = 0  # 띄어쓰기 교정으로 인한 텍스트 길이 변화를 반영하기 위한 변수
+        offset = 0
         for pattern, replacement in self.spacing_rules.items():
             matches = re.finditer(pattern, text)
             for match in matches:
