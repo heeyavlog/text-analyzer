@@ -59,17 +59,9 @@ class TextAnalyzer:
         }
 
 class SpacingChecker:
-    def __init__(self):
-        # 띄어쓰기 규칙을 외부 파일에서 읽어오도록 개선 (rules.txt 파일 필요)
-        with open('rules.txt', 'r', encoding='utf-8') as f:
-            self.spacing_rules = {}
-            for line in f:
-                if line.strip() and not line.startswith('#'):
-                    pattern, replacement = line.strip().split(',')
-                    self.spacing_rules[pattern] = replacement
-
     def check(self, text):
         suggestions = []
+        offset = 0  # 띄어쓰기 교정으로 인한 텍스트 길이 변화를 반영하기 위한 변수
         for pattern, replacement in self.spacing_rules.items():
             matches = re.finditer(pattern, text)
             for match in matches:
@@ -79,9 +71,10 @@ class SpacingChecker:
                     suggestions.append({
                         'original': original,
                         'corrected': corrected,
-                        'start': match.start(),
-                        'end': match.end()
+                        'start': match.start() + offset,  # offset을 더하여 start 위치 보정
+                        'end': match.end() + offset    # offset을 더하여 end 위치 보정
                     })
+                    offset += len(corrected) - len(original)  # 띄어쓰기 추가로 인해 텍스트 길이가 늘어난 만큼 offset 증가
         return suggestions
 
 def main():
