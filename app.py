@@ -145,20 +145,20 @@ def main():
        )
        st.plotly_chart(fig)
        
-# 띄어쓰기 분석
-st.markdown("### 🔍 띄어쓰기 분석")
-suggestions, corrected_text = analyze_spacing(text)
-if suggestions:
-    st.markdown('<div class="result-card">', unsafe_allow_html=True)
-    st.markdown("#### 띄어쓰기 교정 제안:")
-    for suggestion in suggestions:
-        st.markdown(f"- '{suggestion['wrong']}' → '{suggestion['correct']}'")
-    
-    if st.button('교정된 텍스트 보기'):
-        st.text_area("교정된 텍스트:", corrected_text, height=200)
-else:
-    st.success("기본적인 띄어쓰기 검사에서 특이사항이 발견되지 않았습니다.")
-       
+      # 띄어쓰기 분석
+      st.markdown("### 🔍 띄어쓰기 분석")
+      suggestions, corrected_text = analyze_spacing(text)
+      if suggestions:
+          st.markdown('<div class="result-card">', unsafe_allow_html=True)
+          st.markdown("#### 띄어쓰기 교정 제안:")
+          for suggestion in suggestions:
+              st.markdown(f"- '{suggestion['wrong']}' → '{suggestion['correct']}'")
+          
+          if st.button('교정된 텍스트 보기'):
+              st.text_area("교정된 텍스트:", corrected_text, height=200)
+      else:
+          st.success("기본적인 띄어쓰기 검사에서 특이사항이 발견되지 않았습니다.")
+             
        # 블로그 링크 섹션
        st.markdown('---')
        st.markdown('''
